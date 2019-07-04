@@ -45,7 +45,7 @@ DiskDrawer.prototype.housekeeping = function() {
 
 DiskDrawer.prototype.info = function() {
 	let disks=this.index.length;
-	let blockcount=this.index.map((i)=>{return i.blocks.length}).reduce((a,c)=>(a+c));
+	let blockcount=this.index.map((i)=>{return i.blocks.length}).reduce((a,c)=>(a+c),0);
 	let used=JSON.stringify(this).length;
 	let disklist=this.index.map((i)=>{return i.id}).sort();
 	let maxdisks=maxDisksInDrawer;

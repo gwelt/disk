@@ -68,7 +68,7 @@ app.use('/:diskid?/:command?/:block?/:secret?', function (req, res) {
 			  break;
 
 		  case 'ddindex':
-				res.send(dd.index.map((i)=>{return "<a href=\"javascript:command('/insert "+i.id+"')\">"+i.id+"</a>.info = "+JSON.stringify(i.info())+"<br>"}).sort().reduce((a,c)=>{return a+=c}));
+				res.send(dd.index.map((i)=>{return "<a href=\"javascript:command('/insert "+i.id+"')\">"+i.id+"</a>.info = "+JSON.stringify(i.info())+"<br>"}).sort().reduce((a,c)=>{return a+=c},''));
 			  break;
 
 		  case 'help':
