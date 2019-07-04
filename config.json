@@ -1,0 +1,9 @@
+{
+  "port": 3000,
+  "datafilepath": "data",
+  "datafile": "data.json",
+  "cryptosecret": "",
+  "maxDisksInDrawer": 512,
+  "maxDiskSize": 1440000,
+  "maxBlockSize": 512
+}

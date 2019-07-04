@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="de"><head><title>1400kb</title>
+
+<script>
+	var current_diskid=undefined;
+	var uri=location.protocol+'//'+location.host;
+	//uri="http://localhost:3001"; // change for your needs...
+
+	function query(callback,command,diskid,block,secret) {
+		var q={diskid:diskid,command:command,block:block,secret:secret};
+	  var xmlhttp=null;
+	  if (window.XMLHttpRequest) {xmlhttp=new XMLHttpRequest()} else {xmlhttp=new ActiveXObject("Microsoft.XMLHTTP")};
+	  xmlhttp.onreadystatechange=function() { if (xmlhttp.readyState==4) {console.log('RESULT:'+xmlhttp.responseText); callback(xmlhttp.responseText)} }
+	  xmlhttp.open("post",uri,true);
+	  xmlhttp.setRequestHeader("Content-type","application/JSON");
+	  xmlhttp.send(JSON.stringify(q));
+		console.log('SEND:'+JSON.stringify(q));
+	}
+
+	function left(text) {document.getElementById('diskinfo').innerHTML=text||'';}
+	function right(text) {document.getElementById('blocks').innerHTML=text||'';}
+
+	function out(r) {
+		var j=undefined;
+		// help
+		try {j=JSON.parse(r)} catch(err) {right(r); return;}
+		// ?? >> json.error
+		if (j.error!=undefined) {left(r); command('/help'); return;}
+		// format >> json.info
+		if (j.info!=undefined) {left(r); command('/help'); return;}
+		// ddinfo >> json.disks
+		if (j.disks!=undefined) {right(r); left(); return;}
+		// read
+		if (j.blocks!=undefined) {right(j.blocks); current_diskid=j.id; query(out,'info',current_diskid); return;}
+		// info
+		if (j.blockcount!=undefined) {left('<h1>'+current_diskid+'</h1>'+r); return;}
+	}
+
+	function command(c) {
+		if (c) {console.log('CLI:'+c)} else {return}
+		var m=false;
+
+		m=c.match(/^\/help$/i);	if (m) {query(out,'help',m[1])};
+		m=c.match(/^\/insert (.+)$/i); if (m) {query(out,'read',m[1])};
+		m=c.match(/^\/eject$/i); if (m) {current_diskid=undefined; left(); command('/help')};
+		m=c.match(/^\/read$/i); if (m) {query(out,'read',current_diskid||'dd')};
+		m=c.match(/^\/read (.+)$/i); if (m) {query(out,'read',m[1])};
+		m=c.match(/^\/write ([^ ]+) (.+)$/i); if (m) {query(out,'write',m[1],m[2])};
+		m=c.match(/^\/delete (.+)$/i); if (m) {query(out,'delete',current_diskid||'newrandomdiskid',m[1])};
+		m=c.match(/^\/format (.+)$/i); if (m) {query(out,'format',m[1])};
+		m=c.match(/^\/ddinfo$/i); if (m) {query(out,'ddinfo')};
+		m=c.match(/^\/ddindex$/i); if (m) {query(out,'ddindex')};
+		m=c.match(/^\/ddhousekeeping$/i); if (m) {query(out,'ddhousekeeping')};
+		m=c.match(/^([^\/].*)$/i); if (m&&current_diskid) {query(out,'write',current_diskid,m[1])};
+
+		document.getElementById('cli').focus();
+	}
+
+</script>
+
+<style>
+	* {box-sizing: border-box;}
+	html, body, section, div, input {height: 100%; font-family: Monospace; font-size: 1.1rem;}
+	body {border:0; padding:0; margin:0; color: #000;}
+	article {position: relative; padding: 1rem; word-wrap:break-word;}
+	h1 {font-size: 1.75rem; margin: 0 0 0.75rem 0;}
+	.left {background-color: #6497b1; float: left; width: 25%; max-height:100%;	overflow-y:auto;}
+	.right {background-color: #b3cde0; float: left; width: 75%; max-height:100%;	overflow-y:auto;}
+	.bottom {position:fixed; height:0px; bottom:0; background-color:#fff; width:100%;}
+	form {padding:1rem;position:fixed;bottom:0;width:25%;}
+	input {border:0;padding:0.75rem;width:100%;}
+</style>
+
+</head>
+<body onload="command('/help')">
+  <div class="left"><article><div id=diskinfo></div></article></div>
+  <div class="right"><article><div id=blocks></div></article></div>
+  <div class="bottom"><form action="javascript:command(document.getElementById('cli').value)"><input type=text name=diskid id=cli></form></div>
+</body>
+</html>

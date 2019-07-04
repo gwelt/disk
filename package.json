@@ -1,0 +1,15 @@
+{
+  "name": "1440kb",
+  "version": "1.0.0",
+  "description": "rotating text-block-store",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
