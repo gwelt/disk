@@ -16,7 +16,7 @@
 		console.log('SEND:'+JSON.stringify(q));
 	}
 
-	function left(text) {document.getElementById('diskinfo').innerHTML=text||'';}
+	function left(text) {document.getElementById('diskinfo').innerHTML=(text)||'';}
 	function right(text) {document.getElementById('blocks').innerHTML=text||'';}
 
 	function out(r) {
@@ -30,9 +30,14 @@
 		// ddinfo >> json.disks
 		if (j.disks!=undefined) {right(r); left(); return;}
 		// read
-		if (j.blocks!=undefined) {right(j.blocks); current_diskid=j.id; query(out,'info',current_diskid); return;}
+		if (j.blocks!=undefined) {right(lineup(j.blocks)); current_diskid=j.id; query(out,'info',current_diskid); return;}
 		// info
 		if (j.blockcount!=undefined) {left('<h1>'+current_diskid+'</h1>'+r); return;}
+	}
+
+	function lineup(blocks) {
+		//return blocks.map((b)=>{return '.'+b+'.<br>'}).reduce((a,c)=>{a+=c},'');
+		return blocks.reduce((a,c,counter)=>{counter++; return a+=('<div><span style=background-color:#eee>&nbsp;'+counter+'&nbsp;</span> '+c+'</div>')},'');
 	}
 
 	function command(c) {
@@ -55,6 +60,8 @@
 		document.getElementById('cli').focus();
 	}
 
+	function resize() {var e=document.getElementById('diskimage'); e.style.height=(e.clientWidth+22)+'px';}
+
 </script>
 
 <style>
@@ -63,17 +70,23 @@
 	body {border:0; padding:0; margin:0; color: #000;}
 	article {position: relative; padding: 1rem; word-wrap:break-word;}
 	h1 {font-size: 1.75rem; margin: 0 0 0.75rem 0;}
-	.left {background-color: #6497b1; float: left; width: 25%; max-height:100%;	overflow-y:auto;}
-	.right {background-color: #b3cde0; float: left; width: 75%; max-height:100%;	overflow-y:auto;}
-	.bottom {position:fixed; height:0px; bottom:0; background-color:#fff; width:100%;}
-	form {padding:1rem;position:fixed;bottom:0;width:25%;}
-	input {border:0;padding:0.75rem;width:100%;}
+	.left {background-color: #6497b1; float: left; width: 25%; min-width:300px; max-height:100%; overflow-y:auto;}
+	.right {background-color: #b3cde0; max-height:100%;	overflow:auto;}
+	.command {}
+	#diskimage {background-image:url('disk.svg'); background-size:100% auto; background-repeat:no-repeat; min-width:100%;}
+	#diskinfo {padding:6% 15%; min-width:100%;}
+	form {padding:1rem 0rem;position:relative;width:100%}
+	input {border:0;outline:none;padding:0.75rem;width:100%;background:#b3cde0;}
 </style>
 
 </head>
-<body onload="command('/help')">
-  <div class="left"><article><div id=diskinfo></div></article></div>
-  <div class="right"><article><div id=blocks></div></article></div>
-  <div class="bottom"><form action="javascript:command(document.getElementById('cli').value)"><input type=text name=diskid id=cli></form></div>
+<body onload="command('/help');resize();" onresize="resize()">
+	  <div class="left">
+	  <article>
+	  	<div id=diskimage><div id=diskinfo><h1>1440kb</h1>this is a blank disk</div></div>
+			<form action="javascript:command(document.getElementById('cli').value)"><input type=text name=diskid id=cli value=''></form>
+		</article>
+		</div>
+	  <div class="right"><article><div id=blocks></div></article></div>
 </body>
 </html>

@@ -14,6 +14,9 @@ process.on('SIGTERM', function(){ if (config.SIGTERM==undefined) {config.SIGTERM
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/disk.svg', function(req,res) {
+	res.sendFile('3_5_floppy_diskette.svg',{root:path.join(__dirname,'public')});
+});	
 app.use('/:diskid?/:command?/:block?/:secret?', function (req, res) {
 	let diskid = req.params.diskid||req.body.diskid;
 	let command = req.params.command||req.body.command;
