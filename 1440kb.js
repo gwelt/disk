@@ -47,14 +47,65 @@ DiskDrawer.prototype.info = function() {
 	let disks=this.index.length;
 	let blockcount=this.index.map((i)=>{return i.blocks.length}).reduce((a,c)=>(a+c),0);
 	let used=JSON.stringify(this).length;
-	let disklist=this.index.map((i)=>{return i.id}).sort();
+	let disklist=this.index.map((i)=>{return i.info()}).sort();
 	let maxdisks=maxDisksInDrawer;
-	return {disks:disks,blockcount:blockcount,used:used,disklist:disklist,maxdisks:maxdisks};
+	return {disks:disks,blockcount:blockcount,used:used,maxdisks:maxdisks,disklist:disklist};
 }
 
+// ============================================================================
+// === DISK
+// ============================================================================
+
+const maxDiskSize=config.maxDiskSize||1440000; // max number of byte on disk
+const maxBlockSize=config.maxBlockSize||512; // max number of byte in block
+
+function Disk(id) {
+  this.id = id.toLowerCase()||'';
+  this.blocks = [];
+  this.lastwrite = undefined;
+  this.secret = undefined; //this.id; // todo: implement secret
+}
+
+Disk.prototype.write = function(block) {
+	if (block) {
+		this.blocks.push(block.substr(0,maxBlockSize));
+		this.lastwrite=new Date().getTime();
+		this.rotate();
+	}
+	return this.read(1);
+}
+Disk.prototype.rotate = function() {
+	// delete blocks from beginning of the blocks-array until blocks-array fits on disk
+	while (this.used()>maxDiskSize) {this.blocks.shift()}
+}
+
+Disk.prototype.read = function(n) {
+	return {"id":this.id,"blocks":this.blocks.slice(n*-1)};
+}
+
+Disk.prototype.delete = function(block) {
+	this.blocks=this.blocks.filter(b => b!==block);
+	return this.read();
+}
+
+Disk.prototype.info = function() {
+	let blockcount=this.blocks.length;
+	let byte=this.blocks.reduce((a,c)=>{return a+c.length},0);
+	let used=this.used();
+	let secret=(this.secret)?'***':undefined;
+	let idle=(new Date().getTime()-this.lastwrite);
+	let maxblocksize=maxBlockSize;
+	let maxdisksize=maxDiskSize;
+	let free=maxDiskSize-used;
+	let df=((used/maxDiskSize)*100).toFixed(2)+'%';
+	return {id:this.id,blockcount:blockcount,byte:byte,used:used,secret:secret,idle:idle,maxblocksize:maxblocksize,maxdisksize:maxdisksize,free:free,df:df};
+}
+Disk.prototype.used = function() {
+	return JSON.stringify(this).length;
+}
 
 // ============================================================================
-// === DISKDRAWER / SAVE TO DISK
+// === SAVE TO OR LOAD FROM DISK
 // ============================================================================
 DiskDrawer.prototype.save_to_file = function(callback,backup) {
   let data=JSON.stringify(this);
@@ -125,56 +176,3 @@ function decrypt(text,cryptosecret) {
 }
 function getCipherKey(key) {if ((typeof key!= 'string')||(key.length<1)) {key="nosecret"}; while (key.length<32) {key+=key}; while (key.length>32) {key=key.slice(0,-1)}; return key;}
 function hash(data) {return require('crypto').createHash('md5').update(data).digest("hex")}
-
-
-// ============================================================================
-// === DISK
-// ============================================================================
-
-const maxDiskSize=config.maxDiskSize||1440000; // max number of byte on disk
-const maxBlockSize=config.maxBlockSize||512; // max number of byte in block
-
-function Disk(id) {
-  this.id = id.toLowerCase()||'';
-  this.blocks = [];
-  this.lastwrite = undefined;
-  this.secret = undefined; //this.id; // todo: implement secret
-}
-
-Disk.prototype.write = function(block) {
-	if (block) {
-		this.blocks.push(block.substr(0,maxBlockSize));
-		this.lastwrite=new Date().getTime();
-		this.rotate();
-	}
-	return this.read(1);
-}
-Disk.prototype.rotate = function() {
-	// delete blocks from beginning of the blocks-array until blocks-array fits on disk
-	while (this.used()>maxDiskSize) {this.blocks.shift()}
-}
-
-Disk.prototype.read = function(n) {
-	return {"id":this.id,"blocks":this.blocks.slice(n*-1)};
-}
-
-Disk.prototype.delete = function(block) {
-	this.blocks=this.blocks.filter(b => b!==block);
-	return this.read();
-}
-
-Disk.prototype.info = function() {
-	let blockcount=this.blocks.length;
-	let byte=this.blocks.reduce((a,c)=>{return a+c.length},0);
-	let used=this.used();
-	let secret=(this.secret)?'***':undefined;
-	let idle=(new Date().getTime()-this.lastwrite);
-	let maxblocksize=maxBlockSize;
-	let maxdisksize=maxDiskSize;
-	let free=maxDiskSize-used;
-	let df=((used/maxDiskSize)*100).toFixed(2)+'%';
-	return {id:this.id,blockcount:blockcount,byte:byte,used:used,secret:secret,idle:idle,maxblocksize:maxblocksize,maxdisksize:maxdisksize,free:free,df:df};
-}
-Disk.prototype.used = function() {
-	return JSON.stringify(this).length;
-}

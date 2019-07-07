@@ -3,10 +3,9 @@
 <script>
 	var current_diskid=undefined;
 	var uri=location.protocol+'//'+location.host;
-	//uri="http://localhost:3001"; // change for your needs...
 
-	function ajax(callback,command,diskid,block,secret) {
-		var q={diskid:diskid,command:command,block:block,secret:secret};
+	function ajax(callback,command,diskid,block,filter,secret) {
+		var q={diskid:diskid,command:command,block:block,filter:filter,secret:secret};
 	  var xmlhttp=null;
 	  if (window.XMLHttpRequest) {xmlhttp=new XMLHttpRequest()} else {xmlhttp=new ActiveXObject("Microsoft.XMLHTTP")};
 	  xmlhttp.onreadystatechange=function() { if (xmlhttp.readyState==4) {console.log('RESULT:'+xmlhttp.responseText); callback(xmlhttp.responseText)} }
@@ -24,19 +23,16 @@
 		// not json
 		try {j=JSON.parse(r)} catch(err) {right(r); return;}
 		// help
-		if (j.RESTAPI!=undefined) {
-			right(j.README+'<p><h2>HTTP-API</h2>'+j.HTTPAPI+'<h2>REST-API</h2>'+j.RESTAPI+'<h2>COMMANDLINE</h2>'+j.CLI); 
-			return;
-		}
+		if (j.RESTAPI!=undefined) {right(j.README+'<p><h2>REST-API</h2>'+j.RESTAPI+'<h2>HTTP-API</h2>'+j.HTTPAPI+'<h2>COMMANDLINE</h2>'+j.CLI); return;}
 		// ?? >> json.error
 		if (j.error!=undefined) {left(r); command('/help'); return;}
 		// format >> json.info
 		if (j.info!=undefined) {left(r); command('/help'); return;}
-		// ddinfo >> json.disks
-		if (j.disks!=undefined) {right(r); left(); return;}
 		// read
 		if (j.blocks!=undefined) {right(lineup(j.blocks)); current_diskid=j.id; ajax(process,'info',current_diskid); return;}
-		// info
+		// ddinfo >> json.disks
+		if (j.disks!=undefined) {right(r); return;}
+		// info >> json.blockcount
 		if (j.blockcount!=undefined) {left('<h1>'+current_diskid+'</h1>'+r); return;}
 	}
 
@@ -54,7 +50,7 @@
 		m=c.match(/^\/eject$/i); if (m) {current_diskid=undefined; left('<h1>insert_disk</h1>'); command('/help')};
 		m=c.match(/^\/read$/i); if (m) {ajax(process,'read',current_diskid||'default')};
 		m=c.match(/^\/read ([^ ]+)$/i); if (m) {ajax(process,'read',m[1])};
-		m=c.match(/^\/read ([^ ]+) (.+)$/i); if (m) {ajax(process,'read',m[1],m[2])};
+		m=c.match(/^\/read ([^ ]+) (.+)$/i); if (m) {ajax(process,'read',m[1],undefined,m[2])};
 		m=c.match(/^\/write ([^ ]+) (.+)$/i); if (m) {ajax(process,'write',m[1],m[2])};
 		m=c.match(/^\/delete (.+)$/i); if (m) {ajax(process,'delete',current_diskid||'newrandomdiskid',m[1])};
 		m=c.match(/^\/format (.+)$/i); if (m) {ajax(process,'format',m[1])};
