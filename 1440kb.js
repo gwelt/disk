@@ -63,7 +63,7 @@ function Disk(id) {
   this.id = id.toLowerCase()||'';
   this.blocks = [];
   this.lastwrite = undefined;
-  this.secret = undefined; //this.id; // todo: implement secret
+  this.secret = undefined; // todo: implement secret
 }
 
 Disk.prototype.write = function(block) {
@@ -72,7 +72,8 @@ Disk.prototype.write = function(block) {
 		this.lastwrite=new Date().getTime();
 		this.rotate();
 	}
-	return this.read(1);
+	//return {"id":this.id,"success":block||''};
+	return this.read();
 }
 Disk.prototype.rotate = function() {
 	// delete blocks from beginning of the blocks-array until blocks-array fits on disk
@@ -80,7 +81,7 @@ Disk.prototype.rotate = function() {
 }
 
 Disk.prototype.read = function(n) {
-	return {"id":this.id,"blocks":this.blocks.slice(n*-1)};
+	return {"id":this.id,"blocks":this.blocks.slice(n*-1),"filter":n};
 }
 
 Disk.prototype.delete = function(block) {

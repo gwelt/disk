@@ -59,15 +59,15 @@ app.use('/:diskid?/:command?/:block?/:secret?', function (req, res) {
 		
 		} else {res.status(404).json({"error":"disk not found"})}
 
-	} else {
+	} else if (command) {
 
 		switch (command) {
 
-		  case 'ddinfo':
+		  case 'info':
 		  	res.json(dd.info());
 			  break;
 
-		  case 'ddhousekeeping':
+		  case 'housekeeping':
 		  	res.json(dd.housekeeping());
 			  break;
 
@@ -76,16 +76,18 @@ app.use('/:diskid?/:command?/:block?/:secret?', function (req, res) {
 		  		'README':'<h1>1440kb</h1>This database stores '+(config.maxBlockSize||512)+'-byte-text-blocks. It emulates 3,5"-disks with a maximum storage of 1.44MB. If more text-blocks are written to a disk, old text-blocks will be removed automatically (block-rotate).',
 		  		'RESTAPI':'{diskid:[diskid],command:[read|write|delete|format|info|help|ddinfo|ddhousekeeping],block:[text],filter:[filter],secret:[secret]}',
 		  		'HTTPAPI':'/[diskid](/[command])(/[block])(/[secret])',
-		  		'CLI':'/insert [diskid]<br>/eject<br>/read ([diskid]) ([number of blocks from tail])<br>/write [diskid] [text]<br>/delete [text]<br>/format [diskid]<br>/help<br>/ddinfo<br>/ddhousekeeping<br>any line not starting with / will be written to current disk'
+		  		'CLI':'/insert [diskid]<br>/eject<br>/read ([diskid]) ([number of blocks from tail])<br>/write [text]<br>/delete [text]<br>/format [diskid]<br>/help<br>/info<br>/housekeeping<br>any line not starting with / will be written to current disk'
 		  	});
 			  break;
 
 			default:
-				res.sendFile('index.html',{root:path.join(__dirname,'public')});
+		  	res.status(404).json({"error":"no disk - nothing to do"})
 			  break;
-		
+
 		}
 
+	} else {
+		res.sendFile('index.html',{root:path.join(__dirname,'public')});
 	}
 	  
 });

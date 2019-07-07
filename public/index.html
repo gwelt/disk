@@ -27,9 +27,9 @@
 		// ?? >> json.error
 		if (j.error!=undefined) {left(r); command('/help'); return;}
 		// format >> json.info
-		if (j.info!=undefined) {left(r); command('/help'); return;}
+		if (j.info!=undefined) {left(r); command('/info'); return;}
 		// read
-		if (j.blocks!=undefined) {right(lineup(j.blocks)); current_diskid=j.id; ajax(process,'info',current_diskid); return;}
+		if (j.blocks!=undefined) {current_diskid=j.id; right(lineup(j.blocks)); ajax(process,'info',current_diskid); return;}
 		// ddinfo >> json.disks
 		if (j.disks!=undefined) {right(r); return;}
 		// info >> json.blockcount
@@ -46,17 +46,16 @@
 		var m=false;
 
 		m=c.match(/^\/help$/i);	if (m) {ajax(process,'help',m[1])};
-		m=c.match(/^\/insert (.+)$/i); if (m) {ajax(process,'read',m[1])};
+		m=c.match(/^\/insert (.+)$/i); if (m) {current_diskid=m[1]; ajax(process,'write',m[1],undefined);};
 		m=c.match(/^\/eject$/i); if (m) {current_diskid=undefined; left('<h1>insert_disk</h1>'); command('/help')};
-		m=c.match(/^\/read$/i); if (m) {ajax(process,'read',current_diskid||'default')};
+		m=c.match(/^\/read$/i); if (m) {ajax(process,'read',current_diskid)};
 		m=c.match(/^\/read ([^ ]+)$/i); if (m) {ajax(process,'read',m[1])};
 		m=c.match(/^\/read ([^ ]+) (.+)$/i); if (m) {ajax(process,'read',m[1],undefined,m[2])};
-		m=c.match(/^\/write ([^ ]+) (.+)$/i); if (m) {ajax(process,'write',m[1],m[2])};
-		m=c.match(/^\/delete (.+)$/i); if (m) {ajax(process,'delete',current_diskid||'newrandomdiskid',m[1])};
+		m=c.match(/^\/write (.+)$/i); if (m) {ajax(process,'write',current_diskid,m[1])};
+		m=c.match(/^\/delete (.+)$/i); if (m) {ajax(process,'delete',current_diskid,m[1])};
 		m=c.match(/^\/format (.+)$/i); if (m) {ajax(process,'format',m[1])};
-		m=c.match(/^\/ddinfo$/i); if (m) {ajax(process,'ddinfo')};
-		m=c.match(/^\/ddindex$/i); if (m) {ajax(process,'ddindex')};
-		m=c.match(/^\/ddhousekeeping$/i); if (m) {ajax(process,'ddhousekeeping')};
+		m=c.match(/^\/info$/i); if (m) {ajax(process,'info')};
+		m=c.match(/^\/housekeeping$/i); if (m) {ajax(process,'housekeeping')};
 		m=c.match(/^([^\/].*)$/i); if (m&&current_diskid) {ajax(process,'write',current_diskid,m[1])};
 
 		document.getElementById('cli').focus();
