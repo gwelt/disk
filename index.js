@@ -35,7 +35,7 @@ app.use('/:diskid?/:command?/:block?/:secret?', function (req, res) {
 				  break;
 
 			  case 'read':
-			  	res.json(disk.read());
+			  	res.json(disk.read(block)); // in this case block is the number of blocks to be read from tail
 				  break;
 
 			  case 'delete':
@@ -70,12 +70,17 @@ app.use('/:diskid?/:command?/:block?/:secret?', function (req, res) {
 		  	res.json(dd.housekeeping());
 			  break;
 
-		  case 'ddindex':
-				res.send(dd.index.map((i)=>{return "<a href=\"javascript:command('/insert "+i.id+"')\">"+i.id+"</a>.info = "+JSON.stringify(i.info())+"<br>"}).sort().reduce((a,c)=>{return a+=c},''));
+		  case 'help':
+		  	res.json({
+		  		'README':'<h1>1440kb</h1>This database stores '+(config.maxBlockSize||512)+'-byte-text-blocks. It emulates 3,5"-disks with a maximum storage of 1.44MB. If more text-blocks are written to a disk, old text-blocks will be removed automatically (block-rotate).',
+		  		'HTTPAPI':'/[diskid]/read|write|delete|format|info(/[text])(/[secret])',
+		  		'RESTAPI':'{diskid:[diskid],command:[read|write|delete|format|info|help|ddinfo|ddindex|ddhousekeeping],block:[text],secret:[secret]}<br>if command is read and block-text contains a number (n), just the last n blocks will be returned',
+		  		'CLI':'/insert [diskid]<br>/eject<br>/read ([diskid]) ([number of blocks from tail])<br>/write [diskid] [text]<br>/delete [text]<br>/format [diskid]<br>/help<br>/ddinfo<br>/ddindex<br>/ddhousekeeping<br>any line not starting with / will be written to current disk'
+		  	});
 			  break;
 
-		  case 'help':
-		  	res.send("<h1>1440kb</h1>HTTP-API: /[diskid]/['read'|'write'|'delete'|'format'|'info'](/[data])(/[secret])<br>REST-API: {'diskid':[diskid],'command':[read|write|delete|format|info|ddinfo|ddindex|ddhousekeeping],'block':[data],'secret':[secret]}<p>COMMANDLINE:<br>/insert [diskid]<br>/eject<br><br>/read ([diskid])<br>/write [diskid] [text]<br>/delete [text]<br>/format [diskid]<br><br>/help<br>/ddinfo<br>/ddindex<br>/ddhousekeeping<p>any line not starting with '/' will be written to current disk");
+		  case 'ddindex':
+				res.send(dd.index.map((i)=>{return "<a href=\"javascript:command('/insert "+i.id+"')\">"+i.id+"</a>.info = "+JSON.stringify(i.info())+"<br>"}).sort().reduce((a,c)=>{return a+=c},''));
 			  break;
 
 			default:

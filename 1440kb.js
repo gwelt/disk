@@ -147,15 +147,15 @@ Disk.prototype.write = function(block) {
 		this.lastwrite=new Date().getTime();
 		this.rotate();
 	}
-	return this.read();
+	return this.read(1);
 }
 Disk.prototype.rotate = function() {
 	// delete blocks from beginning of the blocks-array until blocks-array fits on disk
 	while (this.used()>maxDiskSize) {this.blocks.shift()}
 }
 
-Disk.prototype.read = function() {
-	return {"id":this.id,"blocks":this.blocks};
+Disk.prototype.read = function(n) {
+	return {"id":this.id,"blocks":this.blocks.slice(n*-1)};
 }
 
 Disk.prototype.delete = function(block) {

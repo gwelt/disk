@@ -5,7 +5,7 @@
 	var uri=location.protocol+'//'+location.host;
 	//uri="http://localhost:3001"; // change for your needs...
 
-	function query(callback,command,diskid,block,secret) {
+	function ajax(callback,command,diskid,block,secret) {
 		var q={diskid:diskid,command:command,block:block,secret:secret};
 	  var xmlhttp=null;
 	  if (window.XMLHttpRequest) {xmlhttp=new XMLHttpRequest()} else {xmlhttp=new ActiveXObject("Microsoft.XMLHTTP")};
@@ -19,10 +19,15 @@
 	function left(text) {document.getElementById('diskinfo').innerHTML=(text)||'';}
 	function right(text) {document.getElementById('blocks').innerHTML=text||'';}
 
-	function out(r) {
+	function process(r) {
 		var j=undefined;
-		// help
+		// not json
 		try {j=JSON.parse(r)} catch(err) {right(r); return;}
+		// help
+		if (j.RESTAPI!=undefined) {
+			right(j.README+'<p><h2>HTTP-API</h2>'+j.HTTPAPI+'<h2>REST-API</h2>'+j.RESTAPI+'<h2>COMMANDLINE</h2>'+j.CLI); 
+			return;
+		}
 		// ?? >> json.error
 		if (j.error!=undefined) {left(r); command('/help'); return;}
 		// format >> json.info
@@ -30,7 +35,7 @@
 		// ddinfo >> json.disks
 		if (j.disks!=undefined) {right(r); left(); return;}
 		// read
-		if (j.blocks!=undefined) {right(lineup(j.blocks)); current_diskid=j.id; query(out,'info',current_diskid); return;}
+		if (j.blocks!=undefined) {right(lineup(j.blocks)); current_diskid=j.id; ajax(process,'info',current_diskid); return;}
 		// info
 		if (j.blockcount!=undefined) {left('<h1>'+current_diskid+'</h1>'+r); return;}
 	}
@@ -44,18 +49,19 @@
 		if (c) {console.log('CLI:'+c)} else {return}
 		var m=false;
 
-		m=c.match(/^\/help$/i);	if (m) {query(out,'help',m[1])};
-		m=c.match(/^\/insert (.+)$/i); if (m) {query(out,'read',m[1])};
-		m=c.match(/^\/eject$/i); if (m) {current_diskid=undefined; left(); command('/help')};
-		m=c.match(/^\/read$/i); if (m) {query(out,'read',current_diskid||'dd')};
-		m=c.match(/^\/read (.+)$/i); if (m) {query(out,'read',m[1])};
-		m=c.match(/^\/write ([^ ]+) (.+)$/i); if (m) {query(out,'write',m[1],m[2])};
-		m=c.match(/^\/delete (.+)$/i); if (m) {query(out,'delete',current_diskid||'newrandomdiskid',m[1])};
-		m=c.match(/^\/format (.+)$/i); if (m) {query(out,'format',m[1])};
-		m=c.match(/^\/ddinfo$/i); if (m) {query(out,'ddinfo')};
-		m=c.match(/^\/ddindex$/i); if (m) {query(out,'ddindex')};
-		m=c.match(/^\/ddhousekeeping$/i); if (m) {query(out,'ddhousekeeping')};
-		m=c.match(/^([^\/].*)$/i); if (m&&current_diskid) {query(out,'write',current_diskid,m[1])};
+		m=c.match(/^\/help$/i);	if (m) {ajax(process,'help',m[1])};
+		m=c.match(/^\/insert (.+)$/i); if (m) {ajax(process,'read',m[1])};
+		m=c.match(/^\/eject$/i); if (m) {current_diskid=undefined; left('<h1>insert_disk</h1>'); command('/help')};
+		m=c.match(/^\/read$/i); if (m) {ajax(process,'read',current_diskid||'default')};
+		m=c.match(/^\/read ([^ ]+)$/i); if (m) {ajax(process,'read',m[1])};
+		m=c.match(/^\/read ([^ ]+) (.+)$/i); if (m) {ajax(process,'read',m[1],m[2])};
+		m=c.match(/^\/write ([^ ]+) (.+)$/i); if (m) {ajax(process,'write',m[1],m[2])};
+		m=c.match(/^\/delete (.+)$/i); if (m) {ajax(process,'delete',current_diskid||'newrandomdiskid',m[1])};
+		m=c.match(/^\/format (.+)$/i); if (m) {ajax(process,'format',m[1])};
+		m=c.match(/^\/ddinfo$/i); if (m) {ajax(process,'ddinfo')};
+		m=c.match(/^\/ddindex$/i); if (m) {ajax(process,'ddindex')};
+		m=c.match(/^\/ddhousekeeping$/i); if (m) {ajax(process,'ddhousekeeping')};
+		m=c.match(/^([^\/].*)$/i); if (m&&current_diskid) {ajax(process,'write',current_diskid,m[1])};
 
 		document.getElementById('cli').focus();
 	}
@@ -70,6 +76,7 @@
 	body {border:0; padding:0; margin:0; color: #000;}
 	article {position: relative; padding: 1rem; word-wrap:break-word;}
 	h1 {font-size: 1.75rem; margin: 0 0 0.75rem 0;}
+	h2 {font-size: 1.25rem; margin: 0.75rem 0 0.25rem 0;}
 	.left {background-color: #6497b1; float: left; width: 25%; min-width:300px; max-height:100%; overflow-y:auto;}
 	.right {background-color: #b3cde0; max-height:100%;	overflow:auto;}
 	.command {}
@@ -80,10 +87,10 @@
 </style>
 
 </head>
-<body onload="command('/help');resize();" onresize="resize()">
+<body onload="command('/eject');resize();" onresize="resize()">
 	  <div class="left">
 	  <article>
-	  	<div id=diskimage><div id=diskinfo><h1>1440kb</h1>this is a blank disk</div></div>
+	  	<div id=diskimage><div id=diskinfo></div></div>
 			<form action="javascript:command(document.getElementById('cli').value)"><input type=text name=diskid id=cli value=''></form>
 		</article>
 		</div>
