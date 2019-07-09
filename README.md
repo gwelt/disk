@@ -9,10 +9,10 @@ This database stores 512-byte-text-blocks. It emulates 3,5"-disks with a maximum
 /insert [diskid]  
 /eject  
 /read ([diskid]) ([number of blocks from tail])  
-/write [diskid] [text]  
+/write [text]  
 /delete [text]  
 /format [diskid]  
-/help  
 /info  
+/help  
 /housekeeping  
 any line not starting with / will be written to current disk 
