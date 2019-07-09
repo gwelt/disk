@@ -6,7 +6,7 @@ var path = require('path');
 var config = {}; try {config=require('./config.json')} catch(err){};
 var port = process.env.PORT || config.port || 3000;
 
-var DiskDrawer = require('./1440kb.js');
+var DiskDrawer = require('./disk.js');
 var dd=new DiskDrawer();
 server.listen(port, function () { dd.load_from_file(()=>{console.log('SERVER LISTENING ON PORT '+port+'\n'+JSON.stringify(dd.info()))}) });
 process.on('SIGINT', function(){ if (config.SIGINT==undefined) {config.SIGINT=true; console.log('SIGINT'); dd.save_to_file(()=>{process.exit(0)},true)} });
