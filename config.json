@@ -4,6 +4,6 @@
   "datafile": "data.json",
   "cryptosecret": "",
   "maxDisksInDrawer": 512,
-  "maxDiskSize": 1440000,
+  "maxDiskSize": 1474560,
   "maxBlockSize": 512
 }
