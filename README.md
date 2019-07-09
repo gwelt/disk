@@ -1,8 +1,8 @@
-# 1440kb
+# DISK
 This database stores 512-byte-text-blocks. It emulates 3,5"-disks with a maximum storage of 1.44MB. If more text-blocks are written to a disk, old text-blocks will be removed automatically (block-rotate).
 
 ## REST-API
-`{diskid:[diskid],command:[read|write|delete|format|info|help|ddinfo|ddhousekeeping],block:[text],filter:[filter],secret:[secret]}`
+`{diskid:[diskid],command:[read|write|delete|format|info|help|housekeeping],block:[text],filter:[filter],secret:[secret]}`
 ## HTTP-API
 `/[diskid] (/[command]) (/[block]) (/[secret])`
 ## HTTP-COMMANDLINE
@@ -13,6 +13,6 @@ This database stores 512-byte-text-blocks. It emulates 3,5"-disks with a maximum
 /delete [text]  
 /format [diskid]  
 /help  
-/ddinfo  
-/ddhousekeeping  
+/info  
+/housekeeping  
 any line not starting with / will be written to current disk 
