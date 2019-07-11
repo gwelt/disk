@@ -22,14 +22,14 @@ DiskDrawer.prototype.newDisk = function(id) {
 				this.index.push(newDisk);
 				return newDisk;
 			} else {return undefined}
-		}		
+		}   
 	}
 }
 
 DiskDrawer.prototype.findDisk = function(id) {
-  if ((typeof id=='string') && this.index instanceof Array && id) {
-    return this.index.find(s => s.id.toLowerCase()==id.toLowerCase())||false;
-  } else {return undefined}
+	if ((typeof id=='string') && this.index instanceof Array && id) {
+		return this.index.find(s => s.id.toLowerCase()==id.toLowerCase())||false;
+	} else {return undefined}
 }
 
 DiskDrawer.prototype.formatDisk = function(id) {
@@ -60,15 +60,15 @@ const maxDiskSize=config.maxDiskSize||1440000; // max number of byte on disk
 const maxBlockSize=config.maxBlockSize||512; // max number of byte in block
 
 function Disk(id) {
-  this.id = id.toLowerCase()||'';
-  this.blocks = [];
-  this.lastwrite = undefined;
-  this.secret = undefined; // todo: implement secret
+	this.id = id.toLowerCase()||'';
+	this.blocks = [];
+	this.lastwrite = undefined;
+	this.secret = undefined; // todo: implement secret
 }
 
 Disk.prototype.write = function(block) {
 	if (block) {
-		this.blocks.push(block.substr(0,maxBlockSize));
+		this.blocks.push(block.toString().substr(0,maxBlockSize));
 		this.lastwrite=new Date().getTime();
 		this.rotate();
 	}
@@ -108,56 +108,54 @@ Disk.prototype.used = function() {
 // ============================================================================
 // === SAVE TO OR LOAD FROM DISK
 // ============================================================================
-DiskDrawer.prototype.save_to_file = function(callback,backup) {
-  let data=JSON.stringify(this);
-  // encrypt
-  if (process.env.SECRET||config.cryptosecret) {
+DiskDrawer.prototype.save_to_file = function(callback) {
+	let data=JSON.stringify(this);
+	// encrypt
+	if (process.env.SECRET||config.cryptosecret) {
 		data=encrypt(data,process.env.SECRET||config.cryptosecret);
 	}
-  let filepath=config.datafilepath||'data';
-  let filename=config.datafile||'data.json';
-  fs.writeFile(filepath+'/'+filename, data, 'utf8', (err)=>{
-    console.log('File '+filepath+'/'+filename+' saved.'+(err?' !!! '+err:''));
-    // save backup
-    if (backup) {
-      filepath+='/backup';
-      filename=hash(JSON.stringify(this));
-      fs.writeFile(filepath+'/'+filename, data, 'utf8', (err)=>{
-        console.log('File '+filepath+'/'+filename+' saved.'+(err?' !!! '+err:''));
-        callback(this);
-      });
-    } else {
-      callback(this);
-    }
-  });
+	let filepath=config.datafilepath||'data';
+	let filename=config.datafile||'data.json';
+	fs.writeFile(filepath+'/'+filename, data, 'utf8', (err)=>{
+		console.log('File '+filepath+'/'+filename+' saved.'+(err?' !!! '+err:''));
+		// try saving backup
+		filepath+='/backup';
+		filename=hash(JSON.stringify(this));
+		fs.writeFile(filepath+'/'+filename, data, 'utf8', (err)=>{
+			if (err) {} else {
+				console.log('File '+filepath+'/'+filename+' saved.'+(err?' !!! '+err:''));
+			}
+			callback(this);
+		});
+	});
 }
 
 DiskDrawer.prototype.load_from_file = function(callback) {
-  this.index=[];
-  let filepath=config.datafilepath||'data';
-  let filename=config.datafile||'data.json';
-  fs.readFile(filepath+'/'+filename, 'utf8', (err, data_encrypted)=>{
-    if (err){console.log('No data-file.')} else {
-      // decrypt
-		  if (process.env.SECRET||config.cryptosecret) {
+	this.index=[];
+	let filepath=config.datafilepath||'data';
+	let filename=config.datafile||'data.json';
+	fs.readFile(filepath+'/'+filename, 'utf8', (err, data_encrypted)=>{
+		if (err){console.log('No data-file.')} else {
+			// decrypt
+			if (process.env.SECRET||config.cryptosecret) {
 				try {data_encrypted=decrypt(JSON.parse(data_encrypted),process.env.SECRET||config.cryptosecret)} catch (err) {console.log('decryption failed',err)}
 			}
-      try {data = JSON.parse(data_encrypted)} catch (err) {data={}};
-      // parse / map
-      if (data.hasOwnProperty('index')) {
-        data.index.forEach((d)=>{
-          var disk=this.newDisk(d.id||undefined);
-          if (disk) {
-          	disk.blocks=d.blocks||[];
-          	disk.lastwrite=d.lastwrite||undefined;
-          	disk.secret=d.secret||undefined;
-          	disk.rotate();
-          }
-        });
-      }
-    }
-    callback(this);
-  });
+			try {data = JSON.parse(data_encrypted)} catch (err) {data={}};
+			// parse / map
+			if (data.hasOwnProperty('index')) {
+				data.index.forEach((d)=>{
+					var disk=this.newDisk(d.id||undefined);
+					if (disk) {
+						disk.blocks=d.blocks||[];
+						disk.lastwrite=d.lastwrite||undefined;
+						disk.secret=d.secret||undefined;
+						disk.rotate();
+					}
+				});
+			}
+		}
+		callback(this);
+	});
 }
 
 function encrypt(text,cryptosecret) {

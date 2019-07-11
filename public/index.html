@@ -6,12 +6,12 @@
 
 	function call1440kb(callback,command,diskid,block,filter,secret) {
 		var q={diskid:diskid,command:command,block:block,filter:filter,secret:secret};
-	  var xmlhttp=null;
-	  if (window.XMLHttpRequest) {xmlhttp=new XMLHttpRequest()} else {xmlhttp=new ActiveXObject("Microsoft.XMLHTTP")};
-	  xmlhttp.onreadystatechange=function() { if (xmlhttp.readyState==4) {console.log('RESULT:'+xmlhttp.responseText); callback(xmlhttp.responseText)} }
-	  xmlhttp.open("post",uri,true);
-	  xmlhttp.setRequestHeader("Content-type","application/JSON");
-	  xmlhttp.send(JSON.stringify(q));
+		var xmlhttp=null;
+		if (window.XMLHttpRequest) {xmlhttp=new XMLHttpRequest()} else {xmlhttp=new ActiveXObject("Microsoft.XMLHTTP")};
+		xmlhttp.onreadystatechange=function() { if (xmlhttp.readyState==4) {console.log('RESULT:'+xmlhttp.responseText); callback(xmlhttp.responseText)} }
+		xmlhttp.open("post",uri,true);
+		xmlhttp.setRequestHeader("Content-type","application/JSON");
+		xmlhttp.send(JSON.stringify(q));
 		console.log('SEND:'+JSON.stringify(q));
 	}
 
@@ -37,7 +37,7 @@
 		if (c) {console.log('CLI:'+c)} else {return}
 		var m=false;
 
-		m=c.match(/^\/help$/i);	if (m) {call1440kb(process,'help')};
+		m=c.match(/^\/help$/i); if (m) {call1440kb(process,'help')};
 		m=c.match(/^\/insert (.+)$/i); if (m) {current_diskid=m[1]; call1440kb(process,'write',m[1],undefined);};
 		m=c.match(/^\/eject$/i); if (m) {current_diskid=undefined; left('<h1>insert_disk</h1>'); command('/help')};
 		m=c.match(/^\/read$/i); if (m) {call1440kb(process,'read',current_diskid)};
@@ -64,23 +64,23 @@
 	article {position: relative; padding: 1rem; word-wrap:break-word;}
 	h1 {font-size: 1.75rem; margin: 0 0 0.75rem 0;}
 	h2 {font-size: 1.25rem; margin: 0.75rem 0 0.25rem 0;}
-	.left {background-color: #6497b1; float: left; width: 25%; min-width:300px; max-height:100%; overflow-y:auto;}
-	.right {background-color: #b3cde0; max-height:100%;	overflow:auto;}
+	.left {background-color: #E5DCC5; float: left; width: 25%; min-width:300px; max-height:100%; overflow-y:auto;}
+	.right {background-color: #E5DCC5; max-height:100%; overflow:auto;}
 	.command {}
 	#diskimage {background-image:url('disk.svg'); background-size:100% auto; background-repeat:no-repeat; min-width:100%;}
 	#diskinfo {padding:6% 15%; min-width:100%;}
 	form {padding:1rem 0rem;position:relative;width:100%}
-	input {border:0;outline:none;padding:0.75rem;width:100%;background:#b3cde0;}
+	input {border:0;outline:none;padding:0.75rem;width:100%;background:#A2AEBB;}
 </style>
 
 </head>
 <body onload="command('/eject');resize();" onresize="resize()">
-	  <div class="left">
-	  <article>
-	  	<div id=diskimage><div id=diskinfo></div></div>
+		<div class="left">
+		<article>
+			<div id=diskimage><div id=diskinfo></div></div>
 			<form action="javascript:command(document.getElementById('cli').value)"><input type=text name=diskid id=cli value=''></form>
 		</article>
 		</div>
-	  <div class="right"><article><div id=blocks></div></article></div>
+		<div class="right"><article><div id=blocks></div></article></div>
 </body>
 </html>
