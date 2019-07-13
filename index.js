@@ -14,8 +14,8 @@ process.on('SIGTERM', function(){ if (config.SIGTERM==undefined) {config.SIGTERM
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/disk.svg', function(req,res) {res.sendFile('3_5_floppy_diskette.svg',{root:path.join(__dirname,'public')})}); 
-app.use('/:diskid?/:command?/:block?/:secret?', function (req, res) {
+app.use('(/disk)?/disk.svg', function(req,res) {res.sendFile('3_5_floppy_diskette.svg',{root:path.join(__dirname,'public')})}); 
+app.use('(/disk)?/:diskid?/:command?/:block?/:secret?', function (req, res) {
 	
 	dd.newDisk('log').write(JSON.stringify(Object.assign({'dt':new Date().toUTCString()},req.body)));
 	
@@ -33,6 +33,7 @@ app.use('/:diskid?/:command?/:block?/:secret?', function (req, res) {
 			switch (command) {
 
 				case 'write':
+					console.log(block);
 					res.json(disk.write(block));
 					break;
 
