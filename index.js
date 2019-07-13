@@ -33,7 +33,6 @@ app.use('(/disk)?/:diskid?/:command?/:block?/:secret?', function (req, res) {
 			switch (command) {
 
 				case 'write':
-					console.log(block);
 					res.json(disk.write(block));
 					break;
 

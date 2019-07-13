@@ -73,7 +73,7 @@ Disk.prototype.write = function(block) {
 		this.rotate();
 	}
 	//return {"id":this.id,"success":block||''};
-	return this.read();
+	return this.read(1);
 }
 Disk.prototype.rotate = function() {
 	// delete blocks from beginning of the blocks-array until blocks-array fits on disk
