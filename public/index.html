@@ -2,7 +2,7 @@
 
 <script>
 	var current_diskid=undefined;
-	var uri=location.protocol+'//'+location.host;
+	var uri=location.href;
 
 	function call1440kb(callback,command,diskid,block,filter,secret) {
 		var q={diskid:diskid,command:command,block:block,filter:filter,secret:secret};
@@ -78,7 +78,7 @@
 		<div class="left">
 		<article>
 			<div id=diskimage><div id=diskinfo></div></div>
-			<form action="javascript:command(document.getElementById('cli').value)"><input type=text name=diskid id=cli value=''></form>
+			<form action="javascript:command(document.getElementById('cli').value)"><input type=text name=diskid id=cli autocomplete=off value=''></form>
 		</article>
 		</div>
 		<div class="right"><article><div id=blocks></div></article></div>
