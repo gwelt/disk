@@ -30,7 +30,7 @@
 	}
 
 	function lineup(blocks) {
-		return blocks.reduce((a,c,counter)=>{counter++; return a+=('<div><span style=background-color:#eee>&nbsp;'+counter+'&nbsp;</span> '+c+'</div>')},'');
+		return blocks.reduce(function (a,c,counter) {counter++; return a+=('<div><span style=background-color:#eee>&nbsp;'+counter+'&nbsp;</span> '+c+'</div>')},'');
 	}
 
 	function command(c) {
