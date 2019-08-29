@@ -67,7 +67,7 @@ app.use('(/disk)?/:diskid?/:command?/:block?/:secret?', function (req, res) {
 					else if (req.method=='GET') {
 						let b=disk.read().blocks.map((x)=>{try {return JSON.parse(x)} catch (e) {return x}});
 						if (command) {
-							res.json(b.filter((b)=>{try {return (b.id==command)} catch (e) {return false}}));
+							res.json(b.find((b)=>{try {return (b.id==command)} catch (e) {return false}}));
 						} else {
 							res.json(b);
 						}
