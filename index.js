@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('(/disk)?/disk.svg', function(req,res) {res.sendFile('3_5_floppy_diskette.svg',{root:path.join(__dirname,'public')})}); 
 app.use('(/disk)?/:diskid?/:command?/:block?/:secret?', function (req, res) {
 	
-	dd.newDisk('log').write(JSON.stringify(Object.assign({'dt':new Date().toUTCString()},req.params,req.body)));
+	//dd.newDisk('log').write(JSON.stringify(Object.assign({'dt':new Date().toUTCString()},req.params,req.body)));
 	
 	let diskid = req.params.diskid||req.body.diskid;
 	let command = req.params.command||req.body.command;

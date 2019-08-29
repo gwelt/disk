@@ -90,6 +90,8 @@ Disk.prototype.delete = function(block) {
 }
 
 Disk.prototype.info = function() {
+	let id='--hidden--';
+	if (this.id.length<=6) {id=this.id}
 	let blockcount=this.blocks.length;
 	let byte=this.blocks.reduce((a,c)=>{return a+c.length},0);
 	let used=this.used();
@@ -99,7 +101,7 @@ Disk.prototype.info = function() {
 	let maxdisksize=maxDiskSize;
 	let free=maxDiskSize-used;
 	let df=((used/maxDiskSize)*100).toFixed(2)+'%';
-	return {id:this.id,blockcount:blockcount,byte:byte,used:used,secret:secret,idle:idle,maxblocksize:maxblocksize,maxdisksize:maxdisksize,free:free,df:df};
+	return {id:id,blockcount:blockcount,byte:byte,used:used,secret:secret,idle:idle,maxblocksize:maxblocksize,maxdisksize:maxdisksize,free:free,df:df};
 }
 Disk.prototype.used = function() {
 	return JSON.stringify(this).length;
