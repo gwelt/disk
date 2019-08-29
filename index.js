@@ -54,7 +54,7 @@ app.use('(/disk)?/:diskid?/:command?/:block?/:secret?', function (req, res) {
 
 				default:
 					// when POSTing to /diskid, write payload/body to disk 
-					if (req.method=='POST') {res.json(disk.write(JSON.stringify(req.body)))}
+					if (req.method=='POST') {res.json(JSON.parse(disk.write(JSON.stringify(req.body)).blocks[0]))}
 					// when GETting /diskid, return last block 
 					else if (req.method=='GET') {res.json(JSON.parse(disk.read(1).blocks[0]))}
 					else {res.json(disk.read())}
