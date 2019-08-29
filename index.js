@@ -53,10 +53,26 @@ app.use('(/disk)?/:diskid?/:command?/:block?/:secret?', function (req, res) {
 					break;
 
 				default:
+					
 					// when POSTing to /diskid, write payload/body to disk 
-					if (req.method=='POST') {res.json(JSON.parse(disk.write(JSON.stringify(req.body)).blocks[0]))}
-					// when GETting /diskid, return last block 
-					else if (req.method=='GET') {res.json(JSON.parse(disk.read(1).blocks[0]))}
+					if (req.method=='POST') {
+						let b=undefined;
+						try {b=JSON.stringify(req.body)} catch (e) {}
+						if (b!==undefined) {res.json(JSON.parse(disk.write(b).blocks[0]))}
+						else {res.json({"error":"could not JSON.parse the request-body"})}
+					}
+					
+					// when GETting /diskid, return all blocks 
+					// when GETting /diskid/ID, return block with "id":ID 
+					else if (req.method=='GET') {
+						let b=disk.read().blocks.map((x)=>{try {return JSON.parse(x)} catch (e) {return x}});
+						if (command) {
+							res.json(b.filter((b)=>{try {return (b.id==command)} catch (e) {return false}}));
+						} else {
+							res.json(b);
+						}
+					}
+					
 					else {res.json(disk.read())}
 					break;
 
