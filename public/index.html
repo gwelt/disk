@@ -4,8 +4,8 @@
 	var current_diskid=undefined;
 	var uri=location.href;
 
-	function call1440kb(callback,command,diskid,block,filter,secret) {
-		var q={diskid:diskid,command:command,block:block,filter:filter,secret:secret};
+	function call1440kb(callback,command,diskid,block,filter) {
+		var q={diskid:diskid,command:command,block:block,filter:filter};
 		var xmlhttp=null;
 		if (window.XMLHttpRequest) {xmlhttp=new XMLHttpRequest()} else {xmlhttp=new ActiveXObject("Microsoft.XMLHTTP")};
 		xmlhttp.onreadystatechange=function() { if (xmlhttp.readyState==4) {console.log('RESULT:'+xmlhttp.responseText); callback(xmlhttp.responseText)} }
@@ -21,7 +21,7 @@
 	function process(r) {
 		var j=undefined;
 		try {j=JSON.parse(r)} catch(err) {right(r); return;}
-		if (j.RESTAPI!=undefined) {right(j.README+'<p><h2>REST-API</h2>'+j.RESTAPI+'<h2>HTTP-API</h2>'+j.HTTPAPI+'<h2>COMMANDLINE</h2>'+j.CLI); return;}
+		if (j.RESTAPI!=undefined) {right(j.README+'<p><h2>REST-API</h2>'+j.RESTAPI+'<h2>API</h2>'+j.API+'<h2>HTTP-API</h2>'+j.HTTPAPI+'<h2>COMMANDLINE</h2>'+j.CLI); return;}
 		if (j.error!=undefined) {left(r); command('/help'); return;}
 		if (j.info!=undefined) {left(r); command('/info'); return;}
 		if (j.blocks!=undefined) {current_diskid=j.id; right(lineup(j.blocks)); call1440kb(process,'info',current_diskid); return;}
