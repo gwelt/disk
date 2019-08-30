@@ -17,7 +17,7 @@ You can POST a JSON-object, that contains your request:
   diskid:[diskid],
   command:[read|write|delete|format|info|help|housekeeping],
   block:[text],
-  filter:[filter]
+  filter:[number of blocks from tail]
 }
 ```
 ## HTTP-API
