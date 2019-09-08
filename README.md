@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/gwelt/disk.svg?branch=master)](https://travis-ci.org/gwelt/disk)
+
 # DISK
 This database stores 512-byte-text-blocks. It emulates 3,5"-disks with a maximum storage of 1.44MB. If more text-blocks are written to a disk, old text-blocks will be removed automatically (block-rotate).
 
