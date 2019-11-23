@@ -5,10 +5,11 @@ var bodyParser = require('body-parser');
 var path = require('path');
 var config = {}; try {config=require('./config.json')} catch(err){};
 var port = process.env.PORT || config.port || 3000;
+module.exports = server;
 
 var DiskDrawer = require('./disk.js');
 var dd=new DiskDrawer();
-server.listen(port, function () { dd.load_from_file(()=>{console.log('SERVER LISTENING ON PORT '+port+'\n'+JSON.stringify(dd.info()))}) });
+server.listen(port, function () { dd.load_from_file(()=>{console.log('\x1b[44m SERVER LISTENING ON PORT '+port+' \x1b[0m\n'+JSON.stringify(dd.info()))}) });
 process.on('SIGINT', function(){ if (config.SIGINT==undefined) {config.SIGINT=true; console.log('SIGINT'); dd.save_to_file(()=>{process.exit(0)})} });
 process.on('SIGTERM', function(){ if (config.SIGTERM==undefined) {config.SIGTERM=true; console.log('SIGTERM'); dd.save_to_file(()=>{process.exit(0)})} });
 
@@ -28,7 +29,8 @@ app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
 	if (diskid) {
 
 		let disk = dd.findDisk(diskid);
-		if ((!disk)&&(command=='write')) {disk=dd.newDisk(diskid)}
+		// create new disk if disk is not existing and this is a POST/PUT/WRITE-request
+		if ((!disk)&& ( (command=='write')|| ((req.params.diskid==diskid)&&((req.method=='POST')||(req.method=='PUT'))) ) ) {disk=dd.newDisk(diskid)}
 		if (disk) {
 
 			switch (command) {
@@ -84,7 +86,7 @@ app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
 						if (command) {
 							// get all blocks > filter by ID (given in command) > delete all filtered blocks
 							disk.read().blocks.filter((x)=>{try {return (JSON.parse(x).id==command)} catch (e) {return false}}).forEach((d)=>{disk.delete(d)});
-							return res.json();
+							return res.json(disk.read());
 						} else {res.json({"error":"nothing to delete"})}
 					}
 
