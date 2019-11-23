@@ -17,7 +17,9 @@ app.use(function (error, req, res, next){next()}); // don't show error-message, 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('(/disk)?/disk.svg', function(req,res) {res.sendFile('3_5_floppy_diskette.svg',{root:path.join(__dirname,'public')})}); 
 app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
-	
+
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 	let diskid = req.params.diskid||req.body.diskid;
 	let command = req.params.command||req.body.command;
 	let block = req.params.block||req.body.block;
