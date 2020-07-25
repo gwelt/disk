@@ -38,8 +38,10 @@ DiskDrawer.prototype.formatDisk = function(id) {
 }
 
 DiskDrawer.prototype.housekeeping = function() {
-	// remove all disks with no blocks
-	this.index = this.index.filter(i => i.blocks.length>0);
+	// remove all disks with no blocks or idle>max_idle
+	let max_idle=28*24*60*60*1000;
+	let min_lastwrite=new Date().getTime()-max_idle;
+	this.index = this.index.filter(i => i.blocks.length>0 && (i.lastwrite>min_lastwrite));
 	return {"info":"all unused/empty disks removed from disk-drawer"};
 }
 
