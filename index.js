@@ -74,11 +74,11 @@ app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
 						try {b=JSON.stringify(req.body)} catch (e) {b={'content':req.body}}
 						let bo=JSON.parse(b);
 						// if ID is given in POST-URL (command) then add "id":ID to the JSON
-						bo.id=command;
+						if (bo.id==undefined) {bo.id=command};
 						// delete all current blocks with the ID that will be used now => overwrite
 						disk.read().blocks.filter((x)=>{if (bo.id==undefined) {return false}; try {return (JSON.parse(x).id==bo.id)} catch (e) {return false}}).forEach((d)=>{disk.delete(d)});
 						// write block to disk
-						res.json(JSON.parse(disk.write(JSON.stringify(bo)).blocks[0]))
+						res.json(disk.write(JSON.stringify(bo)));
 					}
 					
 					// when DELETing /diskid/ID, delete all blocks with "id":ID from disk 
