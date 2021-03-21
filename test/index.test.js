@@ -18,7 +18,7 @@ describe ('POST', function() {
         .end(function(err, res) {
           if (err) throw err;
           console.log(res.text);
-          let r=JSON.parse(res.text);
+          let r=JSON.parse(JSON.parse(res.text).blocks);
           if ( (r.description=='repeat') ) {
             done()
           } else {
@@ -58,7 +58,7 @@ describe ('POST', function() {
         .end(function(err, res) {
           if (err) throw err;
           console.log(res.text);
-          let r=JSON.parse(res.text);
+          let r=JSON.parse(JSON.parse(res.text).blocks);
           if ( (r.description=='sleep') && (r.id=='2') ) {
             done()
           } else {
