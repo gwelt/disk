@@ -21,12 +21,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('(/disk)?/disk.svg', function(req,res) {res.sendFile('3_5_floppy_diskette.svg',{root:path.join(__dirname,'public')})}); 
 app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
 
-	//res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 	let diskid = req.params.diskid||req.body.diskid;
 	let command = req.params.command||req.body.command;
 	let block = req.params.block||req.body.block;
-	if (typeof req.body!=='object') {block=req.body} // in case of text/plain for REST
+	if ((typeof req.body!=='object')||(block==undefined)) {block=req.body} // in case of text/plain for REST
 	let filter = req.body.filter;
 
 	if (diskid) {
