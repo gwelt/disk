@@ -38,10 +38,13 @@ DiskDrawer.prototype.formatDisk = function(id) {
 }
 
 DiskDrawer.prototype.housekeeping = function() {
-	// remove all disks with no blocks or idle>max_idle
-	let max_idle=28*24*60*60*1000;
-	let min_lastwrite=new Date().getTime()-max_idle;
-	this.index = this.index.filter(i => i.blocks.length>0 && (i.lastwrite>min_lastwrite));
+	// first - save_to_file (backup)
+	this.save_to_file(()=>{
+		// remove all disks with no blocks or idle>max_idle
+		let max_idle=28*24*60*60*1000;
+		let min_lastwrite=new Date().getTime()-max_idle;
+		this.index = this.index.filter(i => i.blocks.length>0 && (i.lastwrite>min_lastwrite));
+	});
 	return {"info":"all unused/empty disks removed from disk-drawer"};
 }
 
@@ -58,7 +61,7 @@ DiskDrawer.prototype.info = function() {
 // === DISK
 // ============================================================================
 
-const maxDiskSize=config.maxDiskSize||1440000; // max number of byte on disk
+const maxDiskSize=config.maxDiskSize||1474560; // max number of byte on disk
 const maxBlockSize=config.maxBlockSize||512; // max number of byte in block
 
 function Disk(id) {
@@ -93,7 +96,7 @@ Disk.prototype.delete = function(block) {
 
 Disk.prototype.info = function() {
 	let id='--hidden--';
-	if (this.id.length<=6) {id=this.id}
+	//if (this.id.length<=6) {id=this.id}
 	let blockcount=this.blocks.length;
 	let byte=this.blocks.reduce((a,c)=>{return a+c.length},0);
 	let used=this.used();
@@ -115,7 +118,7 @@ Disk.prototype.used = function() {
 DiskDrawer.prototype.save_to_file = function(callback) {
 	let data=JSON.stringify(this);
 	// encrypt
-	if (process.env.SECRET||config.cryptosecret) {
+	if ((process.env.SECRET||config.cryptosecret) && (config.encrypt==true)) {
 		data=encrypt(data,process.env.SECRET||config.cryptosecret);
 	}
 	let filepath=config.datafilepath||'data';
@@ -142,7 +145,7 @@ DiskDrawer.prototype.load_from_file = function(callback) {
 		if (err){console.log('No data-file.')} else {
 			// decrypt
 			if (process.env.SECRET||config.cryptosecret) {
-				try {data_encrypted=decrypt(JSON.parse(data_encrypted),process.env.SECRET||config.cryptosecret)} catch (err) {console.log('decryption failed',err)}
+				try {data_encrypted=decrypt(JSON.parse(data_encrypted),process.env.SECRET||config.cryptosecret)} catch (err) {console.log('decryption failed')}
 			}
 			try {data = JSON.parse(data_encrypted)} catch (err) {data={}};
 			// parse / map

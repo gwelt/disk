@@ -2,8 +2,9 @@
   "port": 3000,
   "datafilepath": "data",
   "datafile": "data.json",
+  "encrypt": false,
   "cryptosecret": "",
-  "maxDisksInDrawer": 512,
+  "maxDisksInDrawer": 64,
   "maxDiskSize": 1474560,
-  "maxBlockSize": 512
+  "maxBlockSize": 65536
 }
