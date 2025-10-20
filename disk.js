@@ -77,12 +77,12 @@ Disk.prototype.write = function(block) {
 		this.lastwrite=new Date().getTime();
 		this.rotate();
 	}
-	//return {"id":this.id,"success":block||''};
 	return this.read(1);
 }
 Disk.prototype.rotate = function() {
 	// delete blocks from beginning of the blocks-array until blocks-array fits on disk
 	while (this.used()>maxDiskSize) {this.blocks.shift()}
+	return true;
 }
 
 Disk.prototype.read = function(n) {
@@ -91,12 +91,28 @@ Disk.prototype.read = function(n) {
 
 Disk.prototype.delete = function(block) {
 	this.blocks=this.blocks.filter(b => b!==block);
-	return this.read();
+	return true;
+}
+
+Disk.prototype.delete_id_duplicates = function() {
+	let ids=[];
+	// parse blocks-array from tail (latest write) to head (0)
+	for (let i=this.blocks.length-1;i>=0;i--) {
+		// if block is JSON and includes id
+		let b={}; try {b=JSON.parse(this.blocks[i])} catch (e){};
+		if (b.id) {
+			// if this id has been seen before...
+			if (ids.includes(b.id)) {
+				// ...remove it (it's older than the one we already saw)
+				this.blocks.splice(i,1);
+			} else {ids.push(b.id)}
+		}
+	}
+	return true;
 }
 
 Disk.prototype.info = function() {
 	let id='--hidden--';
-	//if (this.id.length<=6) {id=this.id}
 	let blockcount=this.blocks.length;
 	let byte=this.blocks.reduce((a,c)=>{return a+c.length},0);
 	let used=this.used();
