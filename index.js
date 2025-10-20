@@ -12,6 +12,7 @@ var dd=new DiskDrawer();
 server.listen(port, function () { dd.load_from_file(()=>{console.log('\x1b[44m SERVER LISTENING ON PORT '+port+' \x1b[0m\n'+JSON.stringify(dd.info()))}) });
 process.on('SIGINT', function(){ if (config.SIGINT==undefined) {config.SIGINT=true; console.log('SIGINT'); dd.save_to_file(()=>{process.exit(0)})} });
 process.on('SIGTERM', function(){ if (config.SIGTERM==undefined) {config.SIGTERM=true; console.log('SIGTERM'); dd.save_to_file(()=>{process.exit(0)})} });
+setInterval(()=>{dd.save_to_file(()=>{})},12*3600000);
 
 app.use(bodyParser.json({ strict: true }));
 app.use(function (error, req, res, next){next()}); // don't show error-message, if it's not JSON ... just ignore it
@@ -19,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('(/disk)?/disk.svg', function(req,res) {res.sendFile('3_5_floppy_diskette.svg',{root:path.join(__dirname,'public')})}); 
 app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
 
-	res.header("Access-Control-Allow-Origin", "*");
+	//res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 	let diskid = req.params.diskid||req.body.diskid;
 	let command = req.params.command||req.body.command;
@@ -72,12 +73,14 @@ app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
 					else if ((req.method=='POST')||(req.method=='PUT')) {
 						let b=undefined;
 						try {b=JSON.stringify(req.body)} catch (e) {b={'content':req.body}}
+						//console.log('B:'+b);
 						let bo=JSON.parse(b);
 						// if ID is given in POST-URL (command) then add "id":ID to the JSON
 						if (bo.id==undefined) {bo.id=command};
 						// delete all current blocks with the ID that will be used now => overwrite
 						disk.read().blocks.filter((x)=>{if (bo.id==undefined) {return false}; try {return (JSON.parse(x).id==bo.id)} catch (e) {return false}}).forEach((d)=>{disk.delete(d)});
 						// write block to disk
+						//console.log('BO:'+JSON.stringify(bo));
 						res.json(disk.write(JSON.stringify(bo)));
 					}
 					
