@@ -4,11 +4,10 @@
   "description": "3,5\"-disk-rotating-in-memory-database",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gwelt/1440kb.git"
+    "url": "https://github.com/gwelt/disk.git"
   },
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha --reporter tap",
     "start": "node index.js"
   },
   "bugs": {
@@ -19,9 +18,5 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1"
-  },
-  "devDependencies": {
-    "mocha": "^7.1.2",
-    "supertest": "^3.3.0"
   }
 }
