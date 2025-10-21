@@ -26,7 +26,7 @@ app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
 	let diskid = req.params.diskid||req.body.diskid;
 	let command = req.params.command||req.body.command;
 	let block = req.params.block||req.body.block;
-	if ((typeof req.body!=='object')||(block==undefined)) {block=req.body} // in case of text/plain for REST
+	if ((typeof req.body!=='object')||(block==undefined)) {block=JSON.stringify(req.body)} // in case of text/plain for REST or other JSON
 	let filter = req.body.filter;
 
 	if (diskid) {
