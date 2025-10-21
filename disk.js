@@ -71,6 +71,10 @@ function Disk(id) {
 	this.secret = undefined; // todo: implement secret
 }
 
+Disk.prototype.read = function(n) {
+	return this.blocks.slice(n*-1);
+}
+
 Disk.prototype.write = function(block) {
 	if (block) {
 		this.blocks.push(block.toString().substr(0,maxBlockSize));
@@ -79,19 +83,20 @@ Disk.prototype.write = function(block) {
 	}
 	return this.read(1);
 }
+
 Disk.prototype.rotate = function() {
 	// delete blocks from beginning of the blocks-array until blocks-array fits on disk
 	while (this.used()>maxDiskSize) {this.blocks.shift()}
 	return true;
 }
 
-Disk.prototype.read = function(n) {
-	return {"id":this.id,"blocks":this.blocks.slice(n*-1),"filter":n};
-}
-
 Disk.prototype.delete = function(block) {
 	this.blocks=this.blocks.filter(b => b!==block);
 	return true;
+}
+
+Disk.prototype.readDisk = function(n) {
+	return {"id":this.id,"blocks":this.blocks.slice(n*-1),"filter":n};
 }
 
 Disk.prototype.delete_id_duplicates = function() {

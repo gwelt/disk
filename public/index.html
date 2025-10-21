@@ -43,9 +43,9 @@
 		m=c.match(/^\/help$/i); if (m) {call1440kb(process,'help')};
 		m=c.match(/^\/insert (.+)$/i); if (m) {current_diskid=m[1]; call1440kb(process,'write',m[1],undefined);};
 		m=c.match(/^\/eject$/i); if (m) {current_diskid=undefined; left('<h1>insert_disk</h1>'); command('/help')};
-		m=c.match(/^\/read$/i); if (m) {call1440kb(process,'read',current_diskid)};
-		m=c.match(/^\/read ([^ ]+)$/i); if (m) {call1440kb(process,'read',m[1])};
-		m=c.match(/^\/read ([^ ]+) (.+)$/i); if (m) {call1440kb(process,'read',m[1],undefined,m[2])};
+		m=c.match(/^\/read$/i); if (m) {call1440kb(process,'readDisk',current_diskid)};
+		m=c.match(/^\/read ([^ ]+)$/i); if (m) {call1440kb(process,'readDisk',m[1])};
+		m=c.match(/^\/read ([^ ]+) (.+)$/i); if (m) {call1440kb(process,'readDisk',m[1],undefined,m[2])};
 		m=c.match(/^\/write (.+)$/i); if (m) {call1440kb(process,'write',current_diskid,m[1])};
 		m=c.match(/^\/delete (.+)$/i); if (m) {call1440kb(process,'delete',current_diskid,m[1])};
 		m=c.match(/^\/format (.+)$/i); if (m) {call1440kb(process,'format',m[1])};

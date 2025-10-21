@@ -38,16 +38,20 @@ app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
 
 			switch (command) {
 
-				case 'write': // ~POST
-					res.json(disk.write(block));
-					break;
-
 				case 'read': // ~GET
 					res.json(disk.read(filter));
 					break;
 
+				case 'write': // ~POST
+					res.json(disk.write(block));
+					break;
+
 				case 'delete': // ~DELETE
 					res.json(disk.delete(block));
+					break;
+
+				case 'readDisk':
+					res.json(disk.readDisk(filter));
 					break;
 
 				case 'info':
@@ -65,8 +69,10 @@ app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
 					// when GETting /diskid, return all blocks 
 					// when GETting /diskid/ID, return latest block with "id":ID 
 					if (req.method=='GET') {
-						let b=disk.blocks.map((x)=>{try {return JSON.parse(x)} catch (e) {return x}});
-						if (command) {res.json(b.reverse().find((b)=>{try {return (b.id==command)} catch (e) {return false}}))}
+						let b=disk.read(filter).map((x)=>{try {return JSON.parse(x)} catch (e) {return x}}); // ??
+						if (command) {
+							res.json(b.reverse().find((b)=>{try {return (b.id==command)} catch (e) {return false}}))
+						}
 						else {res.json(b)}
 					}
 					
@@ -84,7 +90,7 @@ app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
 							block=JSON.stringify(b);
 						}
 						// delete blocks with same id (duplicates)
-						if (b.id) {disk.blocks.filter((x)=>{try {return (JSON.parse(x).id==b.id)} catch (e) {return false}}).forEach((d)=>{disk.delete(d)})};
+						if (b.id) {disk.read(filter).filter((x)=>{try {return (JSON.parse(x).id==b.id)} catch (e) {return false}}).forEach((d)=>{disk.delete(d)})};
 						// write block to disk
 						res.json(disk.write(block));
 					}
@@ -95,16 +101,16 @@ app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
 						// if ID is given in POST-URL (param: command - see syntax above) it should be deleted
 						if (command) { // = ID in URL
 							// delete blocks with this id
-							disk.blocks.filter((x)=>{try {return (JSON.parse(x).id==command)} catch (e) {return false}}).forEach((d)=>{disk.delete(d)});
-							res.status(204).json();
+							disk.read().filter((x)=>{try {return (JSON.parse(x).id==command)} catch (e) {return false}}).forEach((d)=>{disk.delete(d)});
+							res.status(204).end();
 						} else {
 							// delete all blocks that equal the posted block
 							disk.delete(block);
-							res.status(204).json();
+							res.status(204).end();
 						}
 					}
 
-					else {res.json(disk.read())}
+					else {res.json(disk.read(filter))}
 					break;
 
 			}
