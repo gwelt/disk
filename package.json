@@ -1,6 +1,6 @@
 {
   "name": "disk",
-  "version": "1.0.1",
+  "version": "1.1",
   "description": "3,5\"-disk-rotating-in-memory-database",
   "repository": {
     "type": "git",

@@ -15,19 +15,29 @@ process.on('SIGTERM', function(){ if (config.SIGTERM==undefined) {config.SIGTERM
 setInterval(()=>{dd.housekeeping(()=>{})},12*3600000);
 
 app.use(bodyParser.json({})); // strict: true 
-//app.use(function (error, req, res, next){next()}); // don't show error-message, if it's not JSON ... just ignore it
+app.use(function (error, req, res, next){next()}); // don't show error-message, if it's not JSON ... just ignore it
 app.use(bodyParser.text({}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('(/disk)?/disk.svg', function(req,res) {res.sendFile('3_5_floppy_diskette.svg',{root:path.join(__dirname,'public')})}); 
-app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
+app.use('(/disk)?/:diskid?/:command_or_id?/:block?', function (req, res) {
 
 	res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+	
 	let diskid = req.params.diskid||req.body.diskid;
-	let command = req.params.command||req.body.command;
+	let command = req.params.command_or_id||req.body.command;
 	let block = req.params.block||req.body.block;
-	if ((typeof req.body!=='object')||(block==undefined)) {block=JSON.stringify(req.body)} // in case of text/plain for REST or other JSON
 	let filter = req.body.filter;
+	// in case of text/plain for REST or other JSON
+	if ((typeof req.body!=='object')||(block==undefined)) {block=req.body}
+	if (typeof block==='object') {block=JSON.stringify(block)}
+
+	/*
+	function text (i) {if (typeof i==='object') {return JSON.stringify(i)} else {return i}}
+	console.log('*** PARAMS: '+text(req.params));
+	console.log('*** BODY: '+text(req.body));
+	console.log('*** DISKID:'+diskid+' COMMAND:'+command+' BLOCK:'+block);
+	*/
 
 	if (diskid) {
 
@@ -36,84 +46,76 @@ app.use('(/disk)?/:diskid?/:command?/:block?', function (req, res) {
 		if ((!disk)&& ( (command=='write')|| ((req.params.diskid==diskid)&&((req.method=='POST')||(req.method=='PUT'))) ) ) {disk=dd.newDisk(diskid)}
 		if (disk) {
 
-			switch (command) {
-
-				case 'read': // ~GET
-					res.json(disk.read(filter));
-					break;
-
-				case 'write': // ~POST
-					res.json(disk.write(block));
-					break;
-
-				case 'delete': // ~DELETE
-					res.json(disk.delete(block));
-					break;
-
-				case 'readDisk':
-					res.json(disk.readDisk(filter));
-					break;
-
-				case 'info':
-					res.json(disk.info());
-					break;
-
-				case 'format':
-					res.json(dd.formatDisk(disk.id));
-					break;
-
-				default:
-					
-					// ======== REST ========
-
-					// when GETting /diskid, return all blocks 
-					// when GETting /diskid/ID, return latest block with "id":ID 
-					if (req.method=='GET') {
-						let b=disk.read(filter).map((x)=>{try {return JSON.parse(x)} catch (e) {return x}}); // ??
-						if (command) {
-							res.json(b.reverse().find((b)=>{try {return (b.id==command)} catch (e) {return false}}))
-						}
-						else {res.json(b)}
-					}
-					
-					// when POSTing to /diskid, write request-body to disk 
-					// when POSTing to /diskid/ID, write request-body to disk and add "id":ID
-					else if ((req.method=='POST')||(req.method=='PUT')) {
-						// check if block is JSON // if not: convert to JSON to to checks and maybe use it
-						let b=undefined;
-						try {b=JSON.parse(block)} catch (e) {b={'id':undefined,'content':block}}
-						// if id is given in POST-URL (param: command - see syntax above) it should be added to the content (block)
-						if (command) { // = ID in URL
-							// if no id is present in object, add it...
-							if (b.id==undefined) {b.id=command};
-							// ...and use this to write to disk
-							block=JSON.stringify(b);
-						}
-						// delete blocks with same id (duplicates)
-						if (b.id) {disk.read(filter).filter((x)=>{try {return (JSON.parse(x).id==b.id)} catch (e) {return false}}).forEach((d)=>{disk.delete(d)})};
-						// write block to disk
-						res.json(disk.write(block));
-					}
-					
-					// when DELETing /diskid, delete all blocks that equal the posted block
-					// when DELETing /diskid/ID, delete all blocks with this id from disk 
-					else if (req.method=='DELETE') {
-						// if ID is given in POST-URL (param: command - see syntax above) it should be deleted
-						if (command) { // = ID in URL
-							// delete blocks with this id
-							disk.read().filter((x)=>{try {return (JSON.parse(x).id==command)} catch (e) {return false}}).forEach((d)=>{disk.delete(d)});
-							res.status(204).end();
-						} else {
-							// delete all blocks that equal the posted block
-							disk.delete(block);
-							res.status(204).end();
-						}
-					}
-
-					else {res.json(disk.read(filter))}
-					break;
-
+			if (command=='info') {res.json(disk.info())}
+			else if (command=='readDisk') {res.json(disk.readDisk(filter))}
+			else if (command=='format') {res.json(dd.formatDisk(disk.id))}
+			
+			// when GETting /diskid, return all blocks 
+			// when GETting /diskid/ID, return latest block with "id":ID 
+			else if ((req.method=='GET')||(command=='read')) {
+				if ((command!==undefined)&&(command!=='read')) { // (!) command = id (see app.use above)
+					//console.log('GET ID: '+command);
+					let b=disk.read(filter).map((x)=>{try {return JSON.parse(x)} catch (e) {return x}});
+					let r=b.reverse().find((b)=>{try {return (b.id==command)} catch (e) {return false}});
+					if (!r) {res.status(204)}
+					res.send(r);
+				}
+				else {
+					let r=disk.read(filter).map((x)=>{try {return (JSON.parse(x))} catch (e) {return x}});
+					res.send(r);
+				}
 			}
+			
+			// when POSTing to /diskid, write request-body to disk 
+			// when POSTing to /diskid/ID, write request-body to disk and add "id":ID
+			else if ( ((req.method=='POST')||(req.method=='PUT')||(command=='write')) && (!['info','readDisk','format','read','delete'].includes(command)) ) {
+				
+				// create object from block
+				let b=undefined;
+				try {b=JSON.parse(block)} catch (e) {}
+
+				// check if id is given in block-object
+				if (b&&b.id!==undefined) {
+					// nothing to do
+					//console.log('POST ID: '+b.id);
+				}
+
+				// check if id is given in req.param (command)
+				if ((command!==undefined)&&(command!=='write')) { // (!) command = id (see app.use above)
+					//console.log('POST ID: '+command);
+					// if not an object > turn it into one
+					if (typeof b!=='object') {b={'id':undefined,'content':block}}
+					// add id
+					if (b.id==undefined) {b.id=command};
+					// convert to block again
+					block=JSON.stringify(b);
+					//console.log('BLOCK: '+block);
+				}
+
+				// delete blocks with same id (remove duplicates)
+				if (b&&b.id) {disk.read(filter).filter((x)=>{try {return (JSON.parse(x).id==b.id)} catch (e) {return false}}).forEach((d)=>{disk.delete(d)})};
+
+				disk.write(block);
+				res.send(block);
+			}
+			
+			// when DELETing /diskid, delete all blocks that equal the posted block
+			// when DELETing /diskid/ID, delete all blocks with this id from disk 
+			else if ((req.method=='DELETE')||(command=='delete')) {
+				// if ID is given in POST-URL (param: command - see syntax above) it should be deleted
+				if ((command!==undefined)&&(command!=='delete')) { // (!) command = id (see app.use above)
+					//console.log('DELETE ID: '+command);
+					// delete blocks with this id
+					disk.read().filter((x)=>{try {return (JSON.parse(x).id==command)} catch (e) {return false}}).forEach((d)=>{disk.delete(d)});
+					res.status(204).end();
+				} else {
+					// delete all blocks that equal the posted block
+					disk.delete(block);
+					res.status(204).end();
+				}
+			}
+
+			else {res.json(disk.read(filter))}
 		
 		} else {res.status(404).json({"error":"disk not found"})}
 
