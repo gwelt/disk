@@ -41,7 +41,7 @@ DiskDrawer.prototype.housekeeping = function() {
 	// first - save_to_file (backup)
 	this.save_to_file(()=>{
 		// remove all disks with no blocks or idle>max_idle
-		let max_idle=3*28*24*60*60*1000;
+		let max_idle=3*28*24*60*60*1000; // ~3 months
 		let min_lastwrite=new Date().getTime()-max_idle;
 		this.index = this.index.filter(i => i.blocks.length>0 && (i.lastwrite>min_lastwrite));
 	});
