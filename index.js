@@ -135,7 +135,7 @@ app.use('(/disk)?/:diskid?/:command_or_id?/:block?', function (req, res) {
 
 				res.json({
 					'README':'<h1>DISK</h1>This database stores '+(config.maxBlockSize||512)+'-byte-text-blocks. It emulates '+(config.maxDisksInDrawer||512)+' 3,5"-disks with maximum storage of '+((config.maxDiskSize||1474560)/1024000).toFixed(2)+'MB each. If more text-blocks are written to a disk, oldest text-blocks are removed (block-rotate).',
-					'RESTAPI':'GET /[diskid](/[id])<br>POST|PUT /[diskid](/[id]) [text]|{block:[text]}<br>DELETE /[diskid]/[id]',
+					'RESTAPI':'GET /[diskid](/[id])<br>POST|PUT /[diskid](/[id]) [text]|{block:[text]}<br>DELETE /[diskid](/[id]) ([text]|{block:[text]})',
 					'API':'POST {diskid:[diskid],command:[read|write|delete|format|info|help|housekeeping],block:[text],filter:[filter]}',
 					'HTTPAPI':'GET /[diskid](/[command])(/[block])',
 					'CLI':'/insert [diskid]<br>/eject<br>/read ([diskid]) ([number of blocks from tail])<br>/write [text]<br>/delete [text]<br>/format [diskid]<br>/help<br>/info<br>/housekeeping<br>any line not starting with / will be written to current disk'
